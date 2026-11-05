@@ -1,7 +1,8 @@
-
 package com.application.job.portal.config;
 
 import org.springframework.context.annotation.Bean;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,10 +14,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import com.application.job.portal.security.CustomUserDetailsService;
 import com.application.job.portal.security.JwtAuthenticationFilter;
 
+@EnableMethodSecurity
 @Configuration
 public class SecurityConfig {
 
@@ -53,7 +55,9 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http)
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            AuthenticationProvider authenticationProvider)
             throws Exception {
 
         http
@@ -63,6 +67,15 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
 
+            .exceptionHandling(exception -> exception
+            	    .authenticationEntryPoint((request, response, authException) -> {
+            	        response.sendError(
+            	            HttpServletResponse.SC_UNAUTHORIZED,
+            	            "Authentication required"
+            	        );
+            	    })
+            	)
+            
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/user/create",
@@ -74,13 +87,11 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
 
-            .authenticationProvider(authenticationProvider(
-                null, null
-            ));
+            .authenticationProvider(authenticationProvider);
 
         http.addFilterBefore(
-                jwtFilter,
-                UsernamePasswordAuthenticationFilter.class
+            jwtFilter,
+            UsernamePasswordAuthenticationFilter.class
         );
 
         return http.build();
