@@ -9,4 +9,5 @@ import com.application.job.portal.model.Company;
 public interface CompanyRepository extends JpaRepository<Company,Long>{
 
 	List<Company>findByRecruiterId(Long recruiterId);
+	List<Company>findByRecruiterEmail(String email);
 }

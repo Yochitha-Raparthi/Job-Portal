@@ -44,8 +44,7 @@ public class Company {
 	)
 	String website;
 
-	@NotNull(message = "Recruiter is required")
 	@ManyToOne
-	@JoinColumn(name = "recruiter_id")
+	@JoinColumn(name = "recruiter_id", nullable = false)
 	User recruiter;
 }

@@ -8,11 +8,16 @@ import com.application.job.portal.model.Company;
 
 
 public interface CompanyService {
-
-	Company createCompany(Company c);
+	
 	List<Company>getAllCompanies();
+	
 	Company getCompanyById(Long Id);
-	List<Company>getCompaniesByRecruiters(Long recruiterId);
-	Company updateCompany(Company c,Long Id);
-	void deleteCompany(Long Id);
+	
+	Company createCompany(Company c, String email);
+
+	List<Company> getMyCompanies(String email);
+
+	Company updateCompany(Company c, Long id, String email);
+
+	void deleteCompany(Long id, String email);
 }
