@@ -2,20 +2,22 @@ package com.application.job.portal.service;
 
 import java.util.List;
 
+import com.application.job.portal.dto.JobResponse;
 import com.application.job.portal.model.Job;
 
 public interface JobService {
-	List<Job> getAllJobs();
 
-	Job getJobById(Long Id);
+    List<JobResponse> getAllJobs();
 
-	List<Job> getJobsByCompany(Long companyId);
+    JobResponse getJobById(Long id);
 
-	List<Job> searchJobsByTitle(String title);
+    List<JobResponse> getJobsByCompany(Long companyId);
 
-	Job createJob(Job j, String email);
+    List<JobResponse> searchJobsByTitle(String title);
 
-	Job updateJob(Job j, Long id, String email);
+    JobResponse createJob(Job j, String email);
 
-	void deleteJob(Long id, String email);
+    JobResponse updateJob(Job j, Long id, String email);
+
+    void deleteJob(Long id, String email);
 }

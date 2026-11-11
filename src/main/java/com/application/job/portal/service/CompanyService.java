@@ -2,22 +2,20 @@ package com.application.job.portal.service;
 
 import java.util.List;
 
-import org.springframework.stereotype.Service;
-
+import com.application.job.portal.dto.CompanyResponse;
 import com.application.job.portal.model.Company;
 
-
 public interface CompanyService {
-	
-	List<Company>getAllCompanies();
-	
-	Company getCompanyById(Long Id);
-	
-	Company createCompany(Company c, String email);
 
-	List<Company> getMyCompanies(String email);
+    List<CompanyResponse> getAllCompanies();
 
-	Company updateCompany(Company c, Long id, String email);
+    CompanyResponse getCompanyById(Long id);
 
-	void deleteCompany(Long id, String email);
+    CompanyResponse createCompany(Company c, String email);
+
+    List<CompanyResponse> getMyCompanies(String email);
+
+    CompanyResponse updateCompany(Company c, Long id, String email);
+
+    void deleteCompany(Long id, String email);
 }

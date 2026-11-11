@@ -28,9 +28,8 @@ public class Application {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	Long id;
 	
-	@NotNull(message = "Applicant is required")
 	@ManyToOne
-	@JoinColumn(name = "user_id")
+	@JoinColumn(name = "user_id", nullable = false)
 	User applicant;
 
 	@NotNull(message = "Job is required")

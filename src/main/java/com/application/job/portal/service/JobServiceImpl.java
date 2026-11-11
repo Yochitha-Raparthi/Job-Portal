@@ -1,92 +1,3 @@
-//package com.application.job.portal.service;
-//
-//import java.time.LocalDateTime;
-//import java.util.List;
-//
-//import org.springframework.stereotype.Service;
-//
-//import com.application.job.portal.exception.ResourceNotFoundException;
-//import com.application.job.portal.model.Job;
-//import com.application.job.portal.repo.CompanyRepository;
-//import com.application.job.portal.repo.JobRepository;
-//
-//@Service
-//public class JobServiceImpl implements JobService{
-//
-//	private final JobRepository jobRepo;
-//	private final CompanyRepository companyRepo;
-//	public JobServiceImpl(
-//	        JobRepository jobRepo,
-//	        CompanyRepository companyRepo) {
-//	    this.jobRepo = jobRepo;
-//	    this.companyRepo = companyRepo;
-//	}
-//	
-//	@Override
-//	public Job createJob(Job j) {
-//
-//	    if (j.getCompany() == null ||
-//	        j.getCompany().getId() == null ||
-//	        !companyRepo.existsById(j.getCompany().getId())) {
-//
-//	        throw new ResourceNotFoundException("Company not found");
-//	    }
-//
-//	    j.setPostedAt(LocalDateTime.now());
-//
-//	    return jobRepo.save(j);
-//	}
-//
-//	@Override
-//	public List<Job> getAllJobs() {
-//		return jobRepo.findAll();
-//	}
-//
-//	@Override
-//	public Job getJobById(Long Id) {
-//		return jobRepo.findById(Id).orElseThrow(()->
-//		                              new ResourceNotFoundException("Job not found with Id :"+Id));
-//	}
-//
-//	@Override
-//	public List<Job> getJobsByCompany(Long companyId) {
-//		return jobRepo.findByCompanyId(companyId);
-//	}
-//
-//	@Override
-//	public List<Job> searchJobsByTitle(String title) {
-//		return jobRepo.findByTitleContainingIgnoreCase(title);
-//	}
-//
-//	@Override
-//	public Job updateJob(Job j, Long Id) {
-//		Job jobDB=jobRepo.findById(Id).orElseThrow(()->
-//                        new ResourceNotFoundException("Job not found with Id :"+Id));
-//		  if (j.getCompany() == null ||
-//			        j.getCompany().getId() == null ||
-//			        !companyRepo.existsById(j.getCompany().getId())) {
-//			        throw new ResourceNotFoundException("Company not found");
-//			    }
-//		jobDB.setDescription(j.getDescription());
-//		jobDB.setJobType(j.getJobType());
-//		jobDB.setLocation(j.getLocation());
-//		jobDB.setSalary(j.getSalary());
-//		jobDB.setTitle(j.getTitle());
-//		jobDB.setCompany(j.getCompany());
-//		return jobRepo.save(jobDB);
-//	}
-//
-//	@Override
-//	public void deleteJob(Long Id) {
-//		Job jobDB=jobRepo.findById(Id).orElseThrow(()->
-//        new ResourceNotFoundException("Job not found with Id :"+Id));
-//		jobRepo.delete(jobDB);
-//		
-//	}
-//
-//	
-//}
-
 package com.application.job.portal.service;
 
 import java.time.LocalDateTime;
@@ -95,6 +6,7 @@ import java.util.List;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import com.application.job.portal.dto.JobResponse;
 import com.application.job.portal.exception.ResourceNotFoundException;
 import com.application.job.portal.model.Company;
 import com.application.job.portal.model.Job;
@@ -114,8 +26,24 @@ public class JobServiceImpl implements JobService {
         this.companyRepo = companyRepo;
     }
 
+    // Convert Job entity into JobResponse DTO
+    private JobResponse convertToResponse(Job job) {
+
+        return new JobResponse(
+                job.getId(),
+                job.getTitle(),
+                job.getDescription(),
+                job.getLocation(),
+                job.getSalary(),
+                job.getJobType(),
+                job.getCompany().getId(),
+                job.getCompany().getCompanyName(),
+                job.getPostedAt()
+        );
+    }
+
     @Override
-    public Job createJob(Job j, String email) {
+    public JobResponse createJob(Job j, String email) {
 
         if (j.getCompany() == null ||
                 j.getCompany().getId() == null) {
@@ -135,34 +63,51 @@ public class JobServiceImpl implements JobService {
         j.setCompany(company);
         j.setPostedAt(LocalDateTime.now());
 
-        return jobRepo.save(j);
+        Job savedJob = jobRepo.save(j);
+
+        return convertToResponse(savedJob);
     }
 
     @Override
-    public List<Job> getAllJobs() {
-        return jobRepo.findAll();
+    public List<JobResponse> getAllJobs() {
+
+        return jobRepo.findAll()
+                .stream()
+                .map(this::convertToResponse)
+                .toList();
     }
 
     @Override
-    public Job getJobById(Long id) {
-        return jobRepo.findById(id)
+    public JobResponse getJobById(Long id) {
+
+        Job job = jobRepo.findById(id)
                 .orElseThrow(() ->
                     new ResourceNotFoundException(
                         "Job not found with Id: " + id));
+
+        return convertToResponse(job);
     }
 
     @Override
-    public List<Job> getJobsByCompany(Long companyId) {
-        return jobRepo.findByCompanyId(companyId);
+    public List<JobResponse> getJobsByCompany(Long companyId) {
+
+        return jobRepo.findByCompanyId(companyId)
+                .stream()
+                .map(this::convertToResponse)
+                .toList();
     }
 
     @Override
-    public List<Job> searchJobsByTitle(String title) {
-        return jobRepo.findByTitleContainingIgnoreCase(title);
+    public List<JobResponse> searchJobsByTitle(String title) {
+
+        return jobRepo.findByTitleContainingIgnoreCase(title)
+                .stream()
+                .map(this::convertToResponse)
+                .toList();
     }
 
     @Override
-    public Job updateJob(Job j, Long id, String email) {
+    public JobResponse updateJob(Job j, Long id, String email) {
 
         Job jobDB = jobRepo.findById(id)
                 .orElseThrow(() ->
@@ -197,7 +142,9 @@ public class JobServiceImpl implements JobService {
         jobDB.setSalary(j.getSalary());
         jobDB.setCompany(newCompany);
 
-        return jobRepo.save(jobDB);
+        Job updatedJob = jobRepo.save(jobDB);
+
+        return convertToResponse(updatedJob);
     }
 
     @Override
