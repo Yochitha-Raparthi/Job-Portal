@@ -35,4 +35,8 @@ public interface ApplicationRepository
     // Find one application only if its job belongs to this recruiter.
     List<Application> findByJob_IdAndJob_Company_Recruiter_Email(
             Long jobId, String email);
+    boolean existsByApplicant_IdAndJob_Id(
+    	    Long applicantId,
+    	    Long jobId
+    	);
 }

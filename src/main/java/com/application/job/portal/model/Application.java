@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -17,8 +18,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+
 @Entity
-@Table
+@Table(
+    name = "application",
+    uniqueConstraints = {
+        @UniqueConstraint(
+            columnNames = {"user_id", "job_id"}
+        )
+    }
+)
 @Setter
 @Getter
 @NoArgsConstructor
@@ -32,9 +41,8 @@ public class Application {
 	@JoinColumn(name = "user_id", nullable = false)
 	User applicant;
 
-	@NotNull(message = "Job is required")
 	@ManyToOne
-	@JoinColumn(name = "job_id")
+	@JoinColumn(name = "job_id",nullable=false)
 	Job job;
 
 	@NotBlank(message = "Application status is required")

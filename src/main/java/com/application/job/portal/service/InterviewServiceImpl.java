@@ -1,93 +1,12 @@
-//package com.application.job.portal.service;
-//
-//import java.util.List;
-//
-//import org.springframework.stereotype.Service;
-//
-//import com.application.job.portal.exception.ResourceNotFoundException;
-//import com.application.job.portal.model.Interview;
-//import com.application.job.portal.repo.ApplicationRepository;
-//import com.application.job.portal.repo.InterviewRepository;
-//
-//@Service
-//public class InterviewServiceImpl implements InterviewService{
-//	
-//	private final InterviewRepository interviewRepo;
-//	private final ApplicationRepository applicationRepo;
-//
-//	public InterviewServiceImpl(
-//	        InterviewRepository interviewRepo,
-//	        ApplicationRepository applicationRepo) {
-//
-//	    this.interviewRepo = interviewRepo;
-//	    this.applicationRepo = applicationRepo;
-//	}
-//	
-//	private void validateApplication(Interview i) {
-//
-//	    if (i.getApplication() == null ||
-//	        i.getApplication().getId() == null ||
-//	        !applicationRepo.existsById(i.getApplication().getId())) {
-//	        throw new ResourceNotFoundException("Application not found");
-//	    }
-//	}
-//	
-//	@Override
-//	public Interview scheduleInterview(Interview i) {
-//		validateApplication(i);
-//		return interviewRepo.save(i);
-//	}
-//	@Override
-//	public List<Interview> getAllInterviews() {
-//		return interviewRepo.findAll();
-//	}
-//	@Override
-//	public Interview getInterviewById(Long Id) {
-//		return interviewRepo.findById(Id).orElseThrow(()->
-//		                           new ResourceNotFoundException("Interview not found with Id: "+Id));
-//	}
-//	@Override
-//	public List<Interview> getInterviewsByApplication(Long applicationId) {
-//		return interviewRepo.findByApplicationId(applicationId);
-//	}
-//	@Override
-//	public Interview updateInterview(Interview i, Long Id) {
-//		Interview interviewDB=interviewRepo.findById(Id).orElseThrow(()->
-//                             new ResourceNotFoundException("Interview not found with Id: "+Id));
-//		validateApplication(i);
-//		interviewDB.setApplication(i.getApplication());
-//		interviewDB.setInterviewDate(i.getInterviewDate());
-//		interviewDB.setInterviewMode(i.getInterviewMode());
-//		interviewDB.setMeetingLink(i.getMeetingLink());
-//		interviewDB.setStatus(i.getStatus());
-//		return interviewRepo.save(interviewDB);
-//	}
-//	@Override
-//	public Interview updateInterviewStatus(Long Id, String status) {
-//		Interview interviewDB=interviewRepo.findById(Id).orElseThrow(()->
-//                     new ResourceNotFoundException("Interview not found with Id: "+Id));
-//		interviewDB.setStatus(status);
-//		return interviewRepo.save(interviewDB);
-//	}
-//	@Override
-//	public void deleteInterview(Long Id) {
-//		Interview interviewDB=interviewRepo.findById(Id).orElseThrow(()->
-//        new ResourceNotFoundException("Interview not found with Id: "+Id));
-//		interviewRepo.delete(interviewDB);
-//		
-//	}
-//	
-//
-//}
-
-
 package com.application.job.portal.service;
 
 import java.util.List;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.application.job.portal.dto.InterviewResponse;
 import com.application.job.portal.exception.ResourceNotFoundException;
 import com.application.job.portal.model.Application;
 import com.application.job.portal.model.Interview;
@@ -95,6 +14,7 @@ import com.application.job.portal.repo.ApplicationRepository;
 import com.application.job.portal.repo.InterviewRepository;
 
 @Service
+@Transactional
 public class InterviewServiceImpl implements InterviewService {
 
     private final InterviewRepository interviewRepo;
@@ -108,8 +28,28 @@ public class InterviewServiceImpl implements InterviewService {
         this.applicationRepo = applicationRepo;
     }
 
-    // Check whether the logged-in recruiter owns the job
-    private void checkRecruiterOwnership(Application application, String email) {
+    // Convert Interview entity into InterviewResponse DTO.
+    private InterviewResponse convertToResponse(Interview interview) {
+
+        Application application = interview.getApplication();
+
+        return new InterviewResponse(
+                interview.getId(),
+                application.getId(),
+                application.getApplicant().getId(),
+                application.getApplicant().getName(),
+                application.getJob().getId(),
+                application.getJob().getTitle(),
+                interview.getInterviewDate(),
+                interview.getInterviewMode(),
+                interview.getMeetingLink(),
+                interview.getStatus()
+        );
+    }
+
+    // Check whether the logged-in recruiter owns the job.
+    private void checkRecruiterOwnership(
+            Application application, String email) {
 
         String recruiterEmail = application.getJob()
                 .getCompany()
@@ -122,24 +62,27 @@ public class InterviewServiceImpl implements InterviewService {
         }
     }
 
-    // Check whether the logged-in user is the applicant or the job's recruiter
+    // Check whether the logged-in user is the applicant or the job's recruiter.
     private void checkInterviewAccess(Interview interview, String email) {
 
         Application application = interview.getApplication();
 
         String applicantEmail = application.getApplicant().getEmail();
+
         String recruiterEmail = application.getJob()
                 .getCompany()
                 .getRecruiter()
                 .getEmail();
 
-        if (!applicantEmail.equals(email) && !recruiterEmail.equals(email)) {
+        if (!applicantEmail.equals(email) &&
+                !recruiterEmail.equals(email)) {
+
             throw new AccessDeniedException(
                     "You are not authorized to access this interview");
         }
     }
 
-    // Find an application using its ID
+    // Find an application using its ID.
     private Application getApplication(Long applicationId) {
 
         return applicationRepo.findById(applicationId)
@@ -148,7 +91,7 @@ public class InterviewServiceImpl implements InterviewService {
                                 "Application not found with Id: " + applicationId));
     }
 
-    // Find an interview using its ID
+    // Find an interview using its ID.
     private Interview getInterview(Long id) {
 
         return interviewRepo.findById(id)
@@ -158,51 +101,58 @@ public class InterviewServiceImpl implements InterviewService {
     }
 
     @Override
-    public Interview scheduleInterview(Interview interview, String email) {
+    public InterviewResponse scheduleInterview(
+            Interview interview, String email) {
 
         if (interview.getApplication() == null ||
                 interview.getApplication().getId() == null) {
-            throw new ResourceNotFoundException("Application ID is required");
+
+            throw new ResourceNotFoundException(
+                    "Application ID is required");
         }
 
-        // Load the actual application from the database
         Application application =
                 getApplication(interview.getApplication().getId());
 
-        // Only the recruiter who owns the job can schedule an interview
+        // Only the recruiter who owns the job can schedule an interview.
         checkRecruiterOwnership(application, email);
 
         interview.setApplication(application);
 
-        return interviewRepo.save(interview);
+        Interview savedInterview = interviewRepo.save(interview);
+
+        return convertToResponse(savedInterview);
     }
 
     @Override
-    public List<Interview> getAllInterviews(String email) {
+    public List<InterviewResponse> getAllInterviews(String email) {
 
-        // Return only interviews for this recruiter's jobs
         return interviewRepo
-                .findByApplication_Job_Company_Recruiter_Email(email);
+                .findByApplication_Job_Company_Recruiter_Email(email)
+                .stream()
+                .map(this::convertToResponse)
+                .toList();
     }
 
     @Override
-    public Interview getInterviewById(Long id, String email) {
+    public InterviewResponse getInterviewById(Long id, String email) {
 
         Interview interview = getInterview(id);
 
-        // Applicant or owning recruiter can view it
+        // Applicant or owning recruiter can view it.
         checkInterviewAccess(interview, email);
 
-        return interview;
+        return convertToResponse(interview);
     }
 
     @Override
-    public List<Interview> getInterviewsByApplication(
+    public List<InterviewResponse> getInterviewsByApplication(
             Long applicationId, String email) {
 
         Application application = getApplication(applicationId);
 
         String applicantEmail = application.getApplicant().getEmail();
+
         String recruiterEmail = application.getJob()
                 .getCompany()
                 .getRecruiter()
@@ -210,28 +160,34 @@ public class InterviewServiceImpl implements InterviewService {
 
         if (!applicantEmail.equals(email) &&
                 !recruiterEmail.equals(email)) {
+
             throw new AccessDeniedException(
                     "You are not authorized to view these interviews");
         }
 
-        return interviewRepo.findByApplicationId(applicationId);
+        return interviewRepo.findByApplicationId(applicationId)
+                .stream()
+                .map(this::convertToResponse)
+                .toList();
     }
 
     @Override
-    public Interview updateInterview(
+    public InterviewResponse updateInterview(
             Interview interview, Long id, String email) {
 
         Interview interviewDB = getInterview(id);
 
-        // Check ownership of the existing interview
+        // Check ownership of the existing interview.
         checkRecruiterOwnership(interviewDB.getApplication(), email);
 
         if (interview.getApplication() == null ||
                 interview.getApplication().getId() == null) {
-            throw new ResourceNotFoundException("Application ID is required");
+
+            throw new ResourceNotFoundException(
+                    "Application ID is required");
         }
 
-        // Check ownership of the application being assigned
+        // Check ownership of the application being assigned.
         Application application =
                 getApplication(interview.getApplication().getId());
 
@@ -243,11 +199,13 @@ public class InterviewServiceImpl implements InterviewService {
         interviewDB.setMeetingLink(interview.getMeetingLink());
         interviewDB.setStatus(interview.getStatus());
 
-        return interviewRepo.save(interviewDB);
+        Interview updatedInterview = interviewRepo.save(interviewDB);
+
+        return convertToResponse(updatedInterview);
     }
 
     @Override
-    public Interview updateInterviewStatus(
+    public InterviewResponse updateInterviewStatus(
             Long id, String status, String email) {
 
         Interview interviewDB = getInterview(id);
@@ -256,7 +214,9 @@ public class InterviewServiceImpl implements InterviewService {
 
         interviewDB.setStatus(status);
 
-        return interviewRepo.save(interviewDB);
+        Interview updatedInterview = interviewRepo.save(interviewDB);
+
+        return convertToResponse(updatedInterview);
     }
 
     @Override

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.application.job.portal.dto.ApplicationResponse;
+import com.application.job.portal.exception.DuplicateApplicationException;
 import com.application.job.portal.exception.ResourceNotFoundException;
 import com.application.job.portal.model.Application;
 import com.application.job.portal.model.Job;
@@ -65,6 +66,17 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .orElseThrow(() ->
                     new ResourceNotFoundException("Job not found"));
 
+        boolean alreadyApplied =
+        	    applicationRepo.existsByApplicant_IdAndJob_Id(
+        	        applicant.getId(),
+        	        job.getId()
+        	    );
+
+        	if (alreadyApplied) {
+        	    throw new DuplicateApplicationException(
+        	        "You have already applied for this job"
+        	    );
+        	}
         // Assign the authenticated user, not the ID from the request.
         a.setApplicant(applicant);
         a.setJob(job);
