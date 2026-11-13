@@ -6,11 +6,20 @@ public class LoginResponse {
     private String token;
     private String tokenType;
     private String message;
+    private String role;
+    private String name;
+    public LoginResponse(
+            String token,
+            String tokenType,
+            String message,
+            String role,
+            String name) {
 
-    public LoginResponse(String token, String tokenType, String message) {
         this.token = token;
         this.tokenType = tokenType;
         this.message = message;
+        this.role = role;
+        this.name = name;
     }
 
     public String getToken() {
@@ -23,5 +32,12 @@ public class LoginResponse {
 
     public String getMessage() {
         return message;
+    }
+    public String getRole() {
+        return role;
+    }
+
+    public String getName() {
+        return name;
     }
 }
