@@ -1,0 +1,130 @@
+
+.applications-page {
+  min-height: 80vh;
+  background: #f7f9fc;
+  padding: 60px 8%;
+}
+
+.applications-heading {
+  margin-bottom: 35px;
+}
+
+.applications-heading h1 {
+  color: #142c50;
+  font-size: 34px;
+  margin: 12px 0;
+}
+
+.applications-heading p {
+  color: #64748b;
+}
+
+.applications-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.application-card {
+  background: white;
+  border: 1px solid #e8edf3;
+  border-radius: 15px;
+  padding: 28px;
+}
+
+.application-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.application-card h3 {
+  color: #142c50;
+  margin: 0;
+}
+
+.application-status {
+  background: #e8f7f4;
+  color: #0f766e;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.application-id,
+.application-date {
+  color: #64748b;
+  font-size: 14px;
+  margin: 18px 0;
+}
+
+.application-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid #edf0f5;
+}
+
+.application-actions a {
+  background: #0d9488;
+  color: white;
+  padding: 11px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.application-actions button {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: none;
+  padding: 11px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.application-actions button:disabled {
+  opacity: 0.6;
+}
+
+.applications-empty {
+  background: white;
+  text-align: center;
+  padding: 65px 20px;
+  border-radius: 15px;
+}
+
+.applications-empty h2 {
+  color: #142c50;
+}
+
+.applications-empty p {
+  color: #64748b;
+  margin-bottom: 25px;
+}
+
+.applications-empty a {
+  background: #0d9488;
+  color: white;
+  text-decoration: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+}
+
+@media (max-width: 700px) {
+  .applications-page {
+    padding: 40px 20px;
+  }
+
+  .applications-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .application-card-top {
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,239 @@
+
+.companies-page {
+  min-height: 80vh;
+  background: #f7f9fc;
+  padding: 55px 8%;
+}
+
+.companies-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 35px;
+}
+
+.companies-heading h1 {
+  color: #142c50;
+  font-size: 34px;
+  margin: 10px 0;
+}
+
+.companies-heading p {
+  color: #64748b;
+}
+
+.company-add-btn,
+.company-save-btn {
+  background: #0d9488;
+  color: white;
+  border: none;
+  padding: 13px 22px;
+  border-radius: 9px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.company-add-btn:hover,
+.company-save-btn:hover {
+  background: #0f766e;
+}
+
+.company-form-card {
+  background: white;
+  border: 1px solid #e8edf3;
+  border-radius: 15px;
+  padding: 30px;
+  margin-bottom: 35px;
+}
+
+.company-form-card h2 {
+  color: #142c50;
+  margin-bottom: 25px;
+}
+
+.company-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 22px;
+}
+
+.company-field {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.company-field label {
+  font-weight: 600;
+  color: #334155;
+}
+
+.company-field input,
+.company-field textarea {
+  padding: 13px;
+  border: 1px solid #d9e2ec;
+  border-radius: 8px;
+  font: inherit;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.company-field input:focus,
+.company-field textarea:focus {
+  outline: none;
+  border-color: #0d9488;
+}
+
+.company-full-width {
+  grid-column: 1 / -1;
+}
+
+.company-form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 25px;
+}
+
+.company-cancel-btn {
+  background: #e2e8f0;
+  color: #334155;
+  border: none;
+  padding: 13px 22px;
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+.company-success,
+.company-error {
+  padding: 14px 18px;
+  border-radius: 9px;
+  margin-bottom: 20px;
+}
+
+.company-success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.company-error {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.companies-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.company-card {
+  background: white;
+  padding: 28px;
+  border-radius: 15px;
+  border: 1px solid #e8edf3;
+}
+
+.company-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.company-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: #d8f5ef;
+  color: #0f766e;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.company-location {
+  color: #64748b;
+  font-size: 14px;
+}
+
+.company-card h3 {
+  color: #142c50;
+  margin: 20px 0 12px;
+}
+
+.company-description {
+  color: #64748b;
+  line-height: 1.7;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.company-website {
+  display: inline-block;
+  margin-top: 15px;
+  color: #0d9488;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.company-card-actions {
+  display: flex;
+  gap: 12px;
+  border-top: 1px solid #edf0f5;
+  padding-top: 20px;
+  margin-top: 25px;
+}
+
+.company-edit-btn,
+.company-delete-btn {
+  border: none;
+  padding: 11px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.company-edit-btn {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.company-delete-btn {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.company-delete-btn:disabled,
+.company-save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.companies-empty,
+.companies-message {
+  background: white;
+  border-radius: 14px;
+  text-align: center;
+  padding: 50px 20px;
+  color: #64748b;
+}
+
+@media (max-width: 700px) {
+  .companies-page {
+    padding: 35px 20px;
+  }
+
+  .companies-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .companies-grid,
+  .company-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .company-full-width {
+    grid-column: auto;
+  }
+}
