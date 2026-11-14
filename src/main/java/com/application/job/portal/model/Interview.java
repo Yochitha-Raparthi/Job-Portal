@@ -2,6 +2,7 @@ package com.application.job.portal.model;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -47,7 +48,7 @@ public class Interview {
 	@NotBlank(message = "Meeting link is required")
 	String meetingLink;
 
-	@NotBlank(message = "Interview status is required")
+	@Column(nullable = false)
 	String status;
 	
 	
