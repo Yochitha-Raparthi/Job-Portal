@@ -1,76 +1,125 @@
+
 package com.application.job.portal.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.application.job.portal.exception.ResourceNotFoundException;
 import com.application.job.portal.model.User;
 import com.application.job.portal.repo.UserRepository;
 
 @Service
-public class UserServiceImpl implements UserService{
-	
-	private final UserRepository userRepo;
-	private final PasswordEncoder passwordEncoder;
+public class UserServiceImpl implements UserService {
 
-	public UserServiceImpl(
-	        UserRepository userRepo,
-	        PasswordEncoder passwordEncoder) {
-	    this.userRepo = userRepo;
-	    this.passwordEncoder = passwordEncoder;
-	}
+    private final UserRepository userRepo;
+    private final PasswordEncoder passwordEncoder;
 
-	@Override
-	public User registerUser(User u) {
-		if (userRepo.findByEmail(u.getEmail()).isPresent()) {
-		    throw new IllegalArgumentException("Email already exists");
-		}
-		u.setPassword(passwordEncoder.encode(u.getPassword()));
-		u.setCreatedAt(LocalDateTime.now());
-		return userRepo.save(u);
-	}
+    public UserServiceImpl(
+            UserRepository userRepo,
+            PasswordEncoder passwordEncoder) {
 
-	@Override
-	public List<User> getAllUsers() {
-		return userRepo.findAll();
-	}
+        this.userRepo = userRepo;
+        this.passwordEncoder = passwordEncoder;
+    }
 
-	@Override
-	public User getUserById(Long Id) {
-		return userRepo.findById(Id).orElseThrow(()->
-		                      new ResourceNotFoundException("user not found with ID: " + Id));
-	}
+    @Override
+    @Transactional
+    public User registerUser(User u) {
 
-	@Override
-	public User getUserByEmail(String email) {
-		return userRepo.findByEmail(email).orElseThrow(()->
-                            new ResourceNotFoundException("user not found with email:" + email));
-	}
+        String email = u.getEmail().trim()
+                .toLowerCase(Locale.ROOT);
 
-	@Override
-	public User updateUser(User u, Long Id) {
-	    User userDB=userRepo.findById(Id).orElseThrow(()->
-                                 new ResourceNotFoundException("user not found with ID:" + Id));
-	    
-	    if (u.getPassword() != null && !u.getPassword().isBlank()) {
-	        userDB.setPassword(passwordEncoder.encode(u.getPassword()));
-	    }
-	    userDB.setEmail(u.getEmail());
-	    	userDB.setName(u.getName());
-	    userDB.setRole(u.getRole());
-		return userRepo.save(userDB);
-	}
+        u.setEmail(email);
 
-	@Override
-	public void deleteUser(Long Id) {
-		 User userDB = userRepo.findById(Id)
-			        .orElseThrow(() ->
-			            new ResourceNotFoundException("User not found with ID: " + Id));
-		userRepo.delete(userDB);
-		
-	}
+        if (userRepo.findByEmail(email).isPresent()) {
+            throw new IllegalArgumentException(
+                    "Email already exists"
+            );
+        }
 
+        String role = u.getRole();
+
+        if (!"RECRUITER".equals(role)
+                && !"JOB_SEEKER".equals(role)) {
+
+            throw new IllegalArgumentException(
+                    "Invalid registration role"
+            );
+        }
+
+        // Ignore any ID or creation timestamp sent by client.
+        u.setId(null);
+
+        u.setPassword(
+                passwordEncoder.encode(u.getPassword())
+        );
+
+        u.setCreatedAt(LocalDateTime.now());
+
+        return userRepo.save(u);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<User> getAllUsers() {
+        return userRepo.findAll();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public User getUserById(Long id) {
+        return userRepo.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "User not found with ID: " + id
+                        )
+                );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public User getUserByEmail(String email) {
+        return userRepo.findByEmail(email)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "User not found with email: " + email
+                        )
+                );
+    }
+
+    @Override
+    @Transactional
+    public User updateProfile(Long id, String name) {
+
+        User userDB = getUserById(id);
+
+        userDB.setName(name.trim());
+
+        return userRepo.save(userDB);
+    }
+
+    // Legacy method retained for interface compatibility.
+    // It no longer changes email, password, or role.
+    @Override
+    @Transactional
+    public User updateUser(User u, Long id) {
+
+        User userDB = getUserById(id);
+
+        userDB.setName(u.getName().trim());
+
+        return userRepo.save(userDB);
+    }
+
+    @Override
+    public void deleteUser(Long id) {
+        throw new UnsupportedOperationException(
+                "Account deletion is temporarily disabled"
+        );
+    }
 }

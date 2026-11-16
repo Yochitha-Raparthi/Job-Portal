@@ -56,16 +56,30 @@ public class JwtService {
     }
 
     // Validate token
+//    public boolean isTokenValid(
+//            String token,
+//            UserDetails userDetails) {
+//
+//        String username = extractUsername(token);
+//
+//        return username.equals(userDetails.getUsername())
+//                && extractAllClaims(token)
+//                    .getExpiration()
+//                    .after(new Date());
+//    }
     public boolean isTokenValid(
             String token,
             UserDetails userDetails) {
 
-        String username = extractUsername(token);
+        Claims claims = extractAllClaims(token);
 
-        return username.equals(userDetails.getUsername())
-                && extractAllClaims(token)
-                    .getExpiration()
-                    .after(new Date());
+        String username = claims.getSubject();
+        Date expirationDate = claims.getExpiration();
+
+        return username != null
+                && username.equals(userDetails.getUsername())
+                && expirationDate != null
+                && expirationDate.after(new Date());
     }
 }
 
