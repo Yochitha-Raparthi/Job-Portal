@@ -49,17 +49,24 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
 
-    // Other unexpected exceptions: HTTP 500
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, String>> handleGeneralException(
-            Exception ex) {
 
-        Map<String, String> error = new HashMap<>();
-        error.put("message", "An unexpected error occurred");
+private static final org.slf4j.Logger logger =
+        org.slf4j.LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(error);
-    }
+// Other unexpected exceptions: HTTP 500
+@ExceptionHandler(Exception.class)
+public ResponseEntity<Map<String, String>> handleGeneralException(
+        Exception ex) {
+
+    logger.error("Unexpected error while processing request", ex);
+
+    Map<String, String> error = new HashMap<>();
+    error.put("message", "An unexpected error occurred");
+
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(error);
+}
+
     @ExceptionHandler(DuplicateApplicationException.class)
     public ResponseEntity<String> handleDuplicateApplication(
             DuplicateApplicationException ex) {
